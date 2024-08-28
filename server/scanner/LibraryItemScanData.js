@@ -174,8 +174,8 @@ class LibraryItemScanData {
   }
 
   /**
-   * 
-   * @param {LibraryItem} existingLibraryItem 
+   *
+   * @param {LibraryItem} existingLibraryItem
    * @param {import('./LibraryScan')} libraryScan
    * @returns {boolean} true if changes found
    */
@@ -283,8 +283,8 @@ class LibraryItemScanData {
   /**
    * Update existing library file with scanned in library file data
    * @param {string} libraryItemPath
-   * @param {LibraryItem.LibraryFileObject} existingLibraryFile 
-   * @param {import('../objects/files/LibraryFile')} scannedLibraryFile 
+   * @param {LibraryItem.LibraryFileObject} existingLibraryFile
+   * @param {import('../objects/files/LibraryFile')} scannedLibraryFile
    * @param {import('./LibraryScan')} libraryScan
    * @returns {boolean} false if no changes
    */
@@ -317,7 +317,7 @@ class LibraryItemScanData {
 
   /**
    * Check if existing audio file on Book was removed
-   * @param {import('../models/Book').AudioFileObject} existingAudioFile 
+   * @param {import('../models/Book').AudioFileObject} existingAudioFile
    * @returns {boolean} true if audio file was removed
    */
   checkAudioFileRemoved(existingAudioFile) {
@@ -332,7 +332,7 @@ class LibraryItemScanData {
 
   /**
    * Check if existing ebook file on Book was removed
-   * @param {import('../models/Book').EBookFileObject} ebookFile 
+   * @param {import('../models/Book').EBookFileObject} ebookFile
    * @returns {boolean} true if ebook file was removed
    */
   checkEbookFileRemoved(ebookFile) {
@@ -347,8 +347,8 @@ class LibraryItemScanData {
 
   /**
    * Set data parsed from filenames
-   * 
-   * @param {Object} bookMetadata 
+   *
+   * @param {Object} bookMetadata
    */
   setBookMetadataFromFilenames(bookMetadata) {
     const keysToMap = ['title', 'subtitle', 'publishedYear', 'asin']
@@ -364,13 +364,15 @@ class LibraryItemScanData {
     if (this.mediaMetadata.narrators?.length) {
       bookMetadata.narrators = this.mediaMetadata.narrators
     }
-    if (this.mediaMetadata.seriesName) {
-      bookMetadata.series = [
-        {
-          name: this.mediaMetadata.seriesName,
-          sequence: this.mediaMetadata.seriesSequence || null
-        }
-      ]
+    if (this.mediaMetadata.seriesName?.length) {
+      let sqnce = this.mediaMetadata.seriesSequence
+      this.mediaMetadata.seriesName.forEach((sn) => {
+        bookMetadata.series.push({
+          name: sn,
+          sequence: sqnce || null
+        })
+        sqnce = null
+      })
     }
   }
 }
