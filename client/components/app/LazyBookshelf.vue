@@ -333,6 +333,11 @@ export default {
           this.entities = new Array(this.totalEntities)
         }
 
+        // Log the imageUrl for each entity
+        this.entities.forEach(entity => {
+          console.log(entity.imageUrl);
+        });
+
         for (let i = 0; i < payload.results.length; i++) {
           const index = i + startIndex
           this.entities[index] = payload.results[i]
