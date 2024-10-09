@@ -7,6 +7,7 @@
 </template>
 
 <script>
+
 export default {
   props: {
     id: String,
@@ -15,6 +16,7 @@ export default {
       type: Array,
       default: () => []
     },
+    seriesImg: String,
     width: Number,
     height: Number,
     bookCoverAspectRatio: Number

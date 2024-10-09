@@ -2,6 +2,9 @@ const Sequelize = require('sequelize')
 const Logger = require('../../Logger')
 const Database = require('../../Database')
 const libraryItemsBookFilters = require('./libraryItemsBookFilters')
+const { logger } = require('sequelize/lib/utils/logger')
+const fs = require('fs')
+const path = require('path')
 
 module.exports = {
   decode(text) {
@@ -11,8 +14,8 @@ module.exports = {
   /**
    * Get series filtered and sorted
    *
-   * @param {import('../../models/Library')} library
-   * @param {import('../../models/User')} user
+   * @param {import('../../objects/Library')} library
+   * @param {import('../../objects/user/User')} user
    * @param {string} filterBy
    * @param {string} sortBy
    * @param {boolean} sortDesc
@@ -93,7 +96,7 @@ module.exports = {
       if (!user.canAccessExplicitContent) {
         attrQuery += ' AND b.explicit = 0'
       }
-      if (!user.permissions?.accessAllTags && user.permissions?.itemTagsSelected?.length) {
+      if (!user.permissions.accessAllTags && user.itemTagsSelected.length) {
         if (user.permissions.selectedTagsNotAccessible) {
           attrQuery += ' AND (SELECT count(*) FROM json_each(tags) WHERE json_valid(tags) AND json_each.value IN (:userTagsSelected)) = 0'
         } else {
@@ -137,8 +140,6 @@ module.exports = {
     } else if (sortBy === 'lastBookUpdated') {
       seriesAttributes.include.push([Sequelize.literal('(SELECT MAX(b.updatedAt) FROM books b, bookSeries bs WHERE bs.seriesId = series.id AND b.id = bs.bookId)'), 'mostRecentBookUpdated'])
       order.push(['mostRecentBookUpdated', dir])
-    } else if (sortBy === 'random') {
-      order.push(Database.sequelize.random())
     }
 
     const { rows: series, count } = await Database.seriesModel.findAndCountAll({
@@ -171,7 +172,7 @@ module.exports = {
     // Map series to old series
     const allOldSeries = []
     for (const s of series) {
-      const oldSeries = s.toOldJSON()
+      const oldSeries = s.getOldSeries().toJSON()
 
       if (s.dataValues.totalDuration) {
         oldSeries.totalDuration = s.dataValues.totalDuration
@@ -197,6 +198,25 @@ module.exports = {
         const oldLibraryItem = Database.libraryItemModel.getOldLibraryItem(libraryItem).toJSONMinified()
         return oldLibraryItem
       })
+
+      // use the book paths to check if the series image file exists in the series folder and apply it to the series
+      oldSeries.books.forEach((book) => {
+        // Create a new path variable that takes a substring of the book path up through the series name
+        const newPath = book.path.substring(0, book.path.indexOf(oldSeries.name) + oldSeries.name.length)
+        // Check if the series image file exists in the series folder
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'jfif', 'webp', 'bmp', 'svg']
+        let seriesImagePath = null
+        //loop through all possible extensions and check if the file exists
+        for (const ext of imageExtensions) {
+          const potentialPath = path.join(newPath, `series.${ext}`)
+          //if the file exists, set the series image path
+          if (fs.existsSync(potentialPath)) {
+            oldSeries.seriesImage = potentialPath
+            return
+          }
+        }
+      })
+
       allOldSeries.push(oldSeries)
     }
 
