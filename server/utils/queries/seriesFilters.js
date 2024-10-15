@@ -212,7 +212,8 @@ module.exports = {
           const potentialPath = path.join(newPath, `series.${ext}`)
           //if the file exists, set the series image path
           if (fs.existsSync(potentialPath)) {
-            oldSeries.seriesImage = potentialPath
+            oldSeries.seriesImage = fs.readFileSync(potentialPath, 'base64');
+            oldSeries.seriesImageExtension = ext;
             return
           }
         }
