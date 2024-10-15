@@ -2,6 +2,8 @@ const Sequelize = require('sequelize')
 const Logger = require('../../Logger')
 const Database = require('../../Database')
 const libraryItemsBookFilters = require('./libraryItemsBookFilters')
+const fs = require('fs')
+const path = require('path')
 
 module.exports = {
   decode(text) {
@@ -197,6 +199,25 @@ module.exports = {
         const oldLibraryItem = Database.libraryItemModel.getOldLibraryItem(libraryItem).toJSONMinified()
         return oldLibraryItem
       })
+
+      // use the book paths to check if the series image file exists in the series folder and apply it to the series
+      oldSeries.books.forEach((book) => {
+        // Create a new path variable that takes a substring of the book path up through the series name
+        const newPath = book.path.substring(0, book.path.indexOf(oldSeries.name) + oldSeries.name.length)
+        // Check if the series image file exists in the series folder
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'jfif', 'webp', 'bmp', 'svg']
+        let seriesImagePath = null
+        //loop through all possible extensions and check if the file exists
+        for (const ext of imageExtensions) {
+          const potentialPath = path.join(newPath, `series.${ext}`)
+          //if the file exists, set the series image path
+          if (fs.existsSync(potentialPath)) {
+            oldSeries.seriesImage = potentialPath
+            return
+          }
+        }
+      })
+
       allOldSeries.push(oldSeries)
     }
 
