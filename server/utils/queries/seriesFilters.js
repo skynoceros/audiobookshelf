@@ -201,7 +201,9 @@ module.exports = {
       })
 
       // use the book paths to check if the series image file exists in the series folder and apply it to the series
+      let imageFound = false;
       oldSeries.books.forEach((book) => {
+        if(imageFound) return;
         // Create a new path variable that takes a substring of the book path up through the series name
         const newPath = book.path.substring(0, book.path.indexOf(oldSeries.name) + oldSeries.name.length)
         // Check if the series image file exists in the series folder
@@ -214,7 +216,7 @@ module.exports = {
           if (fs.existsSync(potentialPath)) {
             oldSeries.seriesImage = fs.readFileSync(potentialPath, 'base64');
             oldSeries.seriesImageExtension = ext;
-            return
+            imageFound = true;
           }
         }
       })
