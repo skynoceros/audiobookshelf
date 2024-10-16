@@ -205,18 +205,24 @@ module.exports = {
       oldSeries.books.forEach((book) => {
         if(imageFound) return;
         // Create a new path variable that takes a substring of the book path up through the series name
-        const newPath = book.path.substring(0, book.path.indexOf(oldSeries.name) + oldSeries.name.length)
-        // Check if the series image file exists in the series folder
-        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'jfif', 'webp', 'bmp', 'svg']
-        let seriesImagePath = null
-        //loop through all possible extensions and check if the file exists
-        for (const ext of imageExtensions) {
-          const potentialPath = path.join(newPath, `series.${ext}`)
-          //if the file exists, set the series image path
-          if (fs.existsSync(potentialPath)) {
-            oldSeries.seriesImage = fs.readFileSync(potentialPath, 'base64');
-            oldSeries.seriesImageExtension = ext;
-            imageFound = true;
+     const newPath = path.join(book.path, oldSeries.name);
+        console.log(newPath);
+        // Check if the folder exists
+        if (fs.existsSync(newPath)) {
+          // Check if the series image file exists in the series folder
+          const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'jfif', 'webp', 'bmp', 'svg'];
+          // Loop through all valid extensions and check if the file exists
+          for (const ext of imageExtensions) {
+            const files = fs.readdirSync(newPath);
+            const potentialFile = files.find(file => path.extname(file).toLowerCase() === `.${ext}`);
+            console.log(potentialFile);
+            if (potentialFile) {
+              const potentialPath = path.join(newPath, potentialFile);
+              oldSeries.seriesImage = fs.readFileSync(potentialPath, 'base64');
+              oldSeries.seriesImageExtension = ext;
+              imageFound = true;
+              break;
+            }
           }
         }
       })

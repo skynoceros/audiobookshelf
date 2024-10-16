@@ -3,7 +3,8 @@
     <div cy-id="covers-area" class="relative" :style="{ height: coverHeight + 'px' }">
       <div class="absolute top-0 left-0 w-full box-shadow-book shadow-height" />
       <div class="w-full h-full bg-primary relative rounded overflow-hidden z-0">
-        <covers-group-cover v-if="series" ref="cover" :id="seriesId" :name="displayTitle" :book-items="books" :width="cardWidth" :height="coverHeight" :book-cover-aspect-ratio="bookCoverAspectRatio" />
+        <img v-if="seriesImage" :src="'data:image/' + seriesImageExtension + ';base64,' + seriesImage" :alt="displayTitle" class="absolute top-0 left-0 w-full h-full object-contain" />
+        <covers-group-cover v-else-if="series" ref="cover" :id="seriesId" :name="displayTitle" :book-items="books" :width="cardWidth" :height="coverHeight" :book-cover-aspect-ratio="bookCoverAspectRatio" />
       </div>
 
       <div cy-id="seriesLengthMarker" class="absolute rounded-lg bg-black bg-opacity-90 box-shadow-md z-20" :style="{ top: 0.375 + 'em', right: 0.375 + 'em', padding: `0.1em 0.25em` }" style="background-color: #cd9d49dd">
@@ -82,6 +83,12 @@ export default {
     },
     seriesId() {
       return this.series?.id || ''
+    },
+    seriesImage() {
+      return this.series?.seriesImage || ''
+    },
+    seriesImageExtension() {
+      return this.series?.seriesImageExtension || ''
     },
     title() {
       return this.series?.name || ''
